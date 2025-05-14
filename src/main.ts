@@ -1,32 +1,37 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AccessKeyModule } from './access_key/access_key.module';
-import { TokenModule } from './token/token.module';
 import { Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  // Create the main application
+  // Create a hybrid application (HTTP + TCP)
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
-
-  // Create the access key microservice
-  const accessKeyApp = await NestFactory.createMicroservice(AccessKeyModule, {
+  const configService = app.get(ConfigService);
+  
+  // Configure TCP microservice
+  app.connectMicroservice({
     transport: Transport.TCP,
     options: {
       host: 'localhost',
-      port: 3001,
+      port: parseInt(configService.get('ACCESS_KEY_PORT') ?? '3001'),
     },
   });
-  await accessKeyApp.listen();
-
-  // Create the token microservice
-  const tokenApp = await NestFactory.createMicroservice(TokenModule, {
-    transport: Transport.TCP,
-    options: {
-      host: 'localhost',
-      port: 3002,
-    },
-  });
-  await tokenApp.listen();
+ // Configure TCP microservice
+ app.connectMicroservice({
+  transport: Transport.TCP,
+  options: {
+    host: 'localhost',
+    port: parseInt(configService.get('TOKEN_PORT') ?? '3002'),
+  },
+});
+  // Start all microservices
+  await app.startAllMicroservices();
+  
+  // Start HTTP server
+  const port = configService.get('PORT') ?? 3000;
+  await app.listen(port);
+  console.log('Application is running on:', await app.getUrl());
+  console.log('Access Key Microservice is running on port:', configService.get('ACCESS_KEY_PORT'));
+  console.log('Token Microservice is running on port:', configService.get('TOKEN_PORT'));
 }
 bootstrap();

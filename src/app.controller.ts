@@ -38,8 +38,4 @@ export class AppController {
     }
   }
 
-  @Get("sum")
-  async getSum(): Promise<number> {
-    return this.appService.calculateSum([5, 10, 15]);
-  }
 }
