@@ -105,7 +105,7 @@ A NestJS-based microservice application for managing access keys with rate limit
 
 - Access Key Management (Generate, Validate, Update, Delete)
 - Rate Limiting per Access Key
-- JWT Authentication
+- Custom JWT Authentication implemeation with static token
 - Microservice Architecture with Separate Database Connections
 - Swagger API Documentation
 
