@@ -106,8 +106,27 @@ A NestJS-based microservice application for managing access keys with rate limit
 - Access Key Management (Generate, Validate, Update, Delete)
 - Rate Limiting per Access Key
 - JWT Authentication
-- Microservice Architecture
+- Microservice Architecture with Separate Database Connections
 - Swagger API Documentation
+
+## Architecture
+
+The application consists of three microservices:
+
+1. **Main API Service (Port 3000)**
+   - Handles HTTP requests
+   - Routes requests to appropriate microservices
+   - Provides Swagger documentation
+
+2. **Access Key Service (Port 3001)**
+   - Manages access key operations
+   - Has its own database connection
+   - Handles rate limiting
+
+3. **Token Service (Port 3002)**
+   - Manages token operations
+   - Has its own database connection
+   - Provides token validation
 
 ## Prerequisites
 
@@ -117,13 +136,15 @@ A NestJS-based microservice application for managing access keys with rate limit
 
 ## Environment Setup
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory with the following variables or rename .env.sample to .env:
 
 ```env
+# Service Ports
 PORT=3000
 NODE_ENV=development
 ACCESS_KEY_PORT=3001
 TOKEN_PORT=3002
+
 # Microservices
 SERVICE_ACCESS_KEY_URL=http://localhost:3001
 SERVICE_TOKEN_URL=http://localhost:3002 
@@ -135,7 +156,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 DB_DATABASE=access_key_manager 
 
-# JWT Configuration will be used as JWT token for admin to do the operation
+# JWT Configuration
 JWT_STATIC_TOKEN=ABCD1234
 ```
 
@@ -221,7 +242,6 @@ Body:
 # Validate Access Key
 GET /access-key/validate/:key
 
-
 # Update Access Key
 PATCH /access-key/:key
 Headers:
@@ -243,12 +263,37 @@ Headers:
   - Authorization: Bearer <jwt_static_token>
 ```
 
-### Authentication
+### Token Service
 
 ```bash
-# Get JWT Token
+# Get Token Information
 GET /token/:key
+Response:
+{
+  "token": [{
+    "chainId": number,
+    "address": string,
+    "name": string,
+    "symbol": string,
+    "decimals": number,
+    "logoURI": string
+  }]
+}
 ```
+
+## Database Architecture
+
+Each microservice maintains its own database connection while sharing the same database:
+
+1. **Access Key Service Connection**
+   - Dedicated connection pool
+   - Handles access key and user model operations
+   - Optimized for access key management
+
+2. **Token Service Connection**
+   - Dedicated connection pool
+   - Handles token-related operations
+   - Optimized for token management
 
 ## Rate Limiting
 
