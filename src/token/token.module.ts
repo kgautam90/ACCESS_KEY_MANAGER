@@ -3,6 +3,7 @@ import { TokenController } from './token.controller';
 import { TokenService } from './token.service';
 import { LoggerModule } from '../logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '../config/config.service';
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { ConfigModule } from '@nestjs/config';
     LoggerModule,
   ],
   controllers: [TokenController],
-  providers: [TokenService],
+  providers: [TokenService, ConfigService],
   exports: [TokenService]
 })
 export class TokenModule {}

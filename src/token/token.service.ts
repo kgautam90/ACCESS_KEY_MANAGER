@@ -1,16 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../logger/logger.service';
-
+import { ConfigService } from '../config/config.service';
+export interface TokenAttribute {
+    token: [{
+        chainId: number;
+        address: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+        logoURI: string;
+    }]
+  }
 @Injectable()
 export class TokenService {
-  constructor(private readonly logger: CustomLoggerService) {
+  constructor(private readonly logger: CustomLoggerService, private readonly configService: ConfigService) {
     this.logger.log('TokenService initialized', 'TokenService');
   }
 
-  getToken(): string {
+getToken(accessKey: string): TokenAttribute {
     this.logger.log('Generating token', 'TokenService');
-    const token = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.logger.debug(`Generated token: ${token}`, 'TokenService');
-    return token;
+    const tokens = this.configService.tokenConfig;
+    return { token: tokens.tokens } as TokenAttribute;
   }
 }

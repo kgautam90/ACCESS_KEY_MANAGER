@@ -38,6 +38,16 @@ export class AccessKey extends Model {
     defaultValue: 'active',
   })
   status: 'active' | 'inactive' | 'expired';
+  @Column({
+    type: DataType.VIRTUAL,
+    get() {
+      return this.getDataValue('usageCount');
+    },
+    set(value: number) {
+      this.setDataValue('usageCount', value);
+    },
+  })
+  usageCount: number;
 
   @ForeignKey(() => User)
   @Column({

@@ -1,11 +1,19 @@
 import { Column, Model, Table, DataType, HasMany } from 'sequelize-typescript';
 import { AccessKey } from './access_key.model';
 
+interface UserAttributes {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: 'active' | 'inactive' | 'suspended';
+}
+
 @Table({
   tableName: 'users',
   timestamps: true,
 })
-export class User extends Model {
+export class User extends Model<UserAttributes> {
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
@@ -18,32 +26,26 @@ export class User extends Model {
     allowNull: false,
     unique: true,
   })
-  email: string;
+  declare email: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  password: string;
+  declare firstName: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  firstName: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  lastName: string;
+  declare lastName: string;
 
   @Column({
     type: DataType.ENUM('active', 'inactive', 'suspended'),
     defaultValue: 'active',
   })
-  status: 'active' | 'inactive' | 'suspended';
+  declare status: 'active' | 'inactive' | 'suspended';
 
   @HasMany(() => AccessKey)
-  accessKeys: AccessKey[];
+  declare accessKeys: AccessKey[];
 } 

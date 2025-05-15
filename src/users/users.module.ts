@@ -5,14 +5,17 @@ import { User } from '../models/user.model';
 import { AccessKey } from '../models/access_key.model';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '../config/config.service';
 
 @Module({
   imports: [
     LoggerModule,
-    SequelizeModule.forFeature([User, AccessKey])
+    SequelizeModule.forFeature([User, AccessKey]),
+    ConfigModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, ConfigService],
   exports: [UsersService]
 })
 export class UsersModule {} 

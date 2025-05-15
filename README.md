@@ -96,3 +96,204 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+# Access Key Manager
+
+A NestJS-based microservice application for managing access keys with rate limiting and JWT authentication.
+
+## Features
+
+- Access Key Management (Generate, Validate, Update, Delete)
+- Rate Limiting per Access Key
+- JWT Authentication
+- Microservice Architecture
+- Swagger API Documentation
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- MySQL
+- npm or yarn
+
+## Environment Setup
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+PORT=3000
+NODE_ENV=development
+ACCESS_KEY_PORT=3001
+TOKEN_PORT=3002
+# Microservices
+SERVICE_ACCESS_KEY_URL=http://localhost:3001
+SERVICE_TOKEN_URL=http://localhost:3002 
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=
+DB_DATABASE=access_key_manager 
+
+# JWT Configuration will be used as JWT token for admin to do the operation
+JWT_STATIC_TOKEN=ABCD1234
+```
+
+## Installation
+
+```bash
+# Install dependencies
+$ npm install
+
+# Create database
+$ mysql -u root -e "CREATE DATABASE access_key_manager;"
+```
+
+## Running the Application
+
+```bash
+# Development mode
+$ npm run start:dev
+
+# Production mode
+$ npm run start:prod
+```
+
+The application will start three services:
+- Main API Service: http://localhost:3000
+- Access Key Service: http://localhost:3001
+- Token Service: http://localhost:3002
+
+## API Documentation
+
+Once the application is running, you can access the Swagger documentation at:
+```
+http://localhost:3000/
+```
+
+## API Endpoints
+
+### User Management
+
+```bash
+# Create a User
+POST /users
+Headers: 
+  - Authorization: Bearer <jwt_static_token>
+Body:
+{
+  "email": "user@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "status": "active"  // optional, defaults to "active"
+}
+
+Response:
+{
+  "status": 201,
+  "message": "User created successfully",
+  "data": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "status": "active",
+    "createdAt": "2024-03-21T10:00:00.000Z",
+    "updatedAt": "2024-03-21T10:00:00.000Z"
+  }
+}
+```
+
+### Access Key Management
+
+```bash
+# Generate Access Key
+POST /access-key/generate
+Headers: 
+  - Authorization: Bearer <jwt_static_token>
+Body:
+{
+  "userId": "user_id_from_created_user",
+  "rateLimit": 1000,  
+  "expiry": "2024-04-21T10:00:00.000Z" 
+}
+
+# Validate Access Key
+GET /access-key/validate/:key
+
+
+# Update Access Key
+PATCH /access-key/:key
+Headers:
+  - Authorization: Bearer <jwt_static_token>
+Body:
+{
+  "rateLimit": number,
+  "expiry": "date"
+}
+
+# Delete Access Key
+DELETE /access-key/:key
+Headers:
+  - Authorization: Bearer <jwt_static_token>
+
+# Get User Access Keys
+GET /access-key/user/:userId
+Headers:
+  - Authorization: Bearer <jwt_static_token>
+```
+
+### Authentication
+
+```bash
+# Get JWT Token
+GET /token/:key
+```
+
+## Rate Limiting
+
+- Each access key has a configurable rate limit (requests per minute)
+- Rate limits are tracked using an in-memory event stream
+- Exceeding the rate limit returns a 429 Too Many Requests response
+
+## Development
+
+```bash
+# Run tests
+$ npm run test
+
+# Run e2e tests
+$ npm run test:e2e
+
+# Generate coverage report
+$ npm run test:cov
+```
+
+## Project Structure
+
+```
+src/
+├── access_key/           # Access Key Management
+├── auth/                # Authentication
+├── config/              # Configuration
+├── logger/              # Logging Service
+├── models/              # Database Models
+├── token/              # Token Service
+└── users/              # User Management
+```
+
+## Error Handling
+
+The application uses a consistent error response format:
+
+```json
+{
+  "status": number,
+  "error": string,
+  "message": string
+}
+```
+
+## License
+
+This project is [MIT licensed](LICENSE).

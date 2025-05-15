@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService as NestConfigService} from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { getDatabaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
@@ -11,7 +11,7 @@ import { AccessKeyModule } from './access_key/access_key.module';
 import { TokenModule } from './token/token.module';
 import { AccessKey } from './models/access_key.model';
 import { User } from './models/user.model';
-
+import { ConfigService } from './config/config.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,8 +21,8 @@ import { User } from './models/user.model';
     LoggerModule,
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      inject: [NestConfigService],
+      useFactory: (configService: NestConfigService) => ({
         ...getDatabaseConfig(configService),
         models: [User, AccessKey],
         autoLoadModels: true,
@@ -33,8 +33,8 @@ import { User } from './models/user.model';
       {
         name: 'SERVICE_ACCESS_KEY',
         imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
+        inject: [NestConfigService],
+        useFactory: (configService: NestConfigService) => ({
           transport: Transport.TCP,
           options: {
             host: '::',
@@ -45,8 +45,8 @@ import { User } from './models/user.model';
       {
         name: 'SERVICE_TOKEN',
         imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
+        inject: [NestConfigService],
+        useFactory: (configService: NestConfigService) => ({
           transport: Transport.TCP,
           options: {
             host: '::',
@@ -60,6 +60,6 @@ import { User } from './models/user.model';
     TokenModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService],
 })
 export class AppModule {}
